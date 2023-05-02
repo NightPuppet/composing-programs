@@ -159,7 +159,7 @@ def always_roll(n):
 
 # Experiments
 
-def make_averaged(fn, num_samples=1000):
+def make_averaged(fn, num_samples=100000):
     """Return a function that returns the average_value of FN when called.
 
     To implement this function, you will have to use *args syntax, a new Python
@@ -210,10 +210,9 @@ def max_scoring_num_rolls(dice=six_sided):
     "*** YOUR CODE HERE ***"
     max_score = 0
     max_rolls = 0
-
     for num_rolls in range(1, 11):
         # Calculate the average score for num_rolls using make_averaged
-        avg_score = make_averaged(roll_dice, 10000000000)(num_rolls, dice)
+        avg_score = make_averaged(roll_dice, 1000000)(num_rolls, dice)
 
         # Update max_score and max_rolls if the current average is higher
         if avg_score > max_score:
@@ -272,7 +271,7 @@ def free_bacon(opponent_score):
     return 1 + max(opponent_score // 10, opponent_score % 10)
 
 def is_beneficial_swap(score, opponent_score):
-    return score + free_bacon(opponent_score) == opponent_score / 2
+    return score + free_bacon(opponent_score) == opponent_score // 2
 
 def is_harmful_swap(score, opponent_score):
     return score + free_bacon(opponent_score) == opponent_score * 2
@@ -313,11 +312,10 @@ def swap_strategy(score, opponent_score):
     """
     "*** YOUR CODE HERE ***"
     bacon_score = free_bacon(opponent_score)
-    if is_beneficial_swap(score, opponent_score) or (bacon_score > BACON_MARGIN and not is_harmful_swap(score, opponent_score)):
+    if (is_beneficial_swap(score, opponent_score) or (bacon_score >= BACON_MARGIN and not is_harmful_swap(score, opponent_score))):    
         return 0
     else:
         return BASELINE_NUM_ROLLS
-
 
 def final_strategy(score, opponent_score):
     """Write a brief description of your final strategy.
@@ -329,21 +327,25 @@ def final_strategy(score, opponent_score):
     bacon_score = free_bacon(opponent_score)
     BACON_MARGIN_WIN = 8
     BACON_MARGIN_LOSE = 15
-    num_rolls = max_scoring_num_rolls(dice)
+    num_rolls = 6 if dice == six_sided else 4
+
+    if score >= GOAL_SCORE - bacon_score and (not is_harmful_swap(score, opponent_score)):
+        return 0
 
     if score > opponent_score:
-        bacon_margin = BACON_MARGIN_WIN
+        if bacon_score >= BACON_MARGIN_WIN and (bacon_score + score + opponent_score // 7 == 0):
+            return 0
+        elif (is_beneficial_swap(score, opponent_score) or (bacon_score > BACON_MARGIN_WIN)) and (not is_harmful_swap(score, opponent_score)):
+            return 0
+        else:
+            return num_rolls
     else:
-        bacon_margin = BACON_MARGIN_LOSE
-
-    is_bacon_worth_it = bacon_score > bacon_margin
-    is_swap_beneficial = is_beneficial_swap(score, opponent_score)
-    is_swap_harmful = is_harmful_swap(score, opponent_score)
-
-    if (bacon_score + score + opponent_score // 7 == 0) or (is_bacon_worth_it and is_swap_beneficial and not is_swap_harmful):
-        return 0
-    else:
-        return num_rolls
+        if bacon_score >= BACON_MARGIN_LOSE and (bacon_score + score + opponent_score // 7 == 0):
+            return 0
+        elif (is_beneficial_swap(score, opponent_score) or (bacon_score > BACON_MARGIN_LOSE)) and (not is_harmful_swap(score, opponent_score)):
+            return 0
+        else:
+            return num_rolls
 
 ##########################
 # Command Line Interface #
@@ -422,3 +424,4 @@ def run(*args):
             exit(0)
     elif args.run_experiments:
         run_experiments()
+
