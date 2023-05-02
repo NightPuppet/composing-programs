@@ -1,2 +1,2 @@
 # CS61A
-Problems I solved during the CS61A course.
+Problems I solved in "Composing Programs" [course](https://composingprograms.com/)
