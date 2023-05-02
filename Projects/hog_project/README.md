@@ -41,5 +41,8 @@ Every problem has passed internal tests which can be done through:
 python3 hog_grader.py -q i
 where i - number of problem
 ```
-final_strategy win rate: 0.592155 (done on 100000 tests)
+final_strategy win rate: 0.592155 done on 100000 tests, can be checked through 
+```
+python3 hog.py -r
+```
 
